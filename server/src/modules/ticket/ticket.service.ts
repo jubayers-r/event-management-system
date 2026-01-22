@@ -2,14 +2,22 @@ import { prisma } from "../../lib/prisma";
 
 const buyTicket = async (user_id: string, event_id: string) => {
   await prisma.$transaction(async (tx) => {
-    const event = await tx.event.findUnique({
+    const event = await tx.event.findUniqueOrThrow({
       where: {
         id: event_id,
       },
-      select: { people_capacity: true },
+      select: { people_capacity: true, status: true },
     });
 
-    if (!event || event.people_capacity < 1) {
+    if (!event) {
+      throw new Error("The event does not exist");
+    }
+
+    if (event.status === "DRAFT") {
+      throw new Error("The event is not public yet");
+    }
+
+    if (event.people_capacity < 1 || event.status === "BOOKED") {
       throw new Error("Event is sold out");
     }
 
