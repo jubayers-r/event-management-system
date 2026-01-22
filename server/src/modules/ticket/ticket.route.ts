@@ -9,5 +9,10 @@ router.post(
   authorization(UserRole.USER, UserRole.HOST, UserRole.MANAGER),
   ticketController.buyTicket,
 );
+router.post(
+  "/cancel",
+  authorization(UserRole.USER, UserRole.HOST, UserRole.MANAGER),
+  ticketController.cancelTicket,
+);
 
 export const ticketRoutes = router;
