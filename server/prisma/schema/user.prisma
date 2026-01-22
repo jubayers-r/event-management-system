@@ -1,0 +1,34 @@
+enum Role {
+    USER
+    MANAGER
+    HOST
+}
+
+model User {
+    id            String  @id @default(cuid())
+    name          String
+    email         String  @unique
+    emailVerified Boolean @default(false)
+    image         String?
+    role          Role    @default(USER)
+
+    // Relations
+    sessions Session[]
+    accounts Account[]
+    tickets  Ticket[]
+
+    // Events where this user is the MAIN Host
+    hostedEvents Event[] @relation(name: "EventHost")
+
+    // Events where this user is the MAIN Manager
+    managedEvents Event[] @relation(name: "EventManager")
+
+    // Events where this user is just an attendee
+    attendingEventId String?
+    attendingEvent   Event?  @relation(name: "EventAttendees", fields: [attendingEventId], references: [id])
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@map("user")
+}
