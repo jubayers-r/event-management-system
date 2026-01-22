@@ -17,5 +17,10 @@ router.delete(
   authorization(UserRole.HOST, UserRole.MANAGER),
   eventController.deleteEvent,
 );
+router.patch(
+  "/publish",
+  authorization(UserRole.HOST, UserRole.MANAGER),
+  eventController.publishEvent,
+);
 
 export const eventRoutes = router;

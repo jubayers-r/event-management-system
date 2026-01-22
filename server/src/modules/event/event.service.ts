@@ -36,4 +36,34 @@ const deleteEvent = async (userId: string, event_id: string) => {
   });
 };
 
-export const eventService = { createEvent, getAllEvents, deleteEvent };
+const publishEvent = async (userId: string, event_id: string) => {
+  const eventInfo = await prisma.event.findUnique({
+    where: {
+      id: event_id,
+    },
+    select: {
+      status: true,
+      attendees: true,
+    },
+  });
+
+  if (eventInfo?.status === "ACTIVE") {
+    throw new Error("Event is already active");
+  }
+
+  return await prisma.event.update({
+    where: {
+      id: event_id,
+    },
+    data: {
+      status: "ACTIVE",
+    },
+  });
+};
+
+export const eventService = {
+  createEvent,
+  getAllEvents,
+  deleteEvent,
+  publishEvent,
+};

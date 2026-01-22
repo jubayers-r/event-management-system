@@ -34,6 +34,7 @@ const getAllEvents = async (req: Request, res: Response) => {
     });
   }
 };
+
 const deleteEvent = async (req: Request, res: Response) => {
   try {
     const result = await eventService.deleteEvent(
@@ -54,4 +55,29 @@ const deleteEvent = async (req: Request, res: Response) => {
   }
 };
 
-export const eventController = { createEvent, getAllEvents, deleteEvent };
+const publishEvent = async (req: Request, res: Response) => {
+  try {
+    const result = await eventService.publishEvent(
+      req.user!.id,
+      req.body.event_id,
+    );
+    res.status(201).json({
+      success: true,
+      message: "Event publish successfully",
+      data: result,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to publish event",
+      error: error instanceof Error ? error.message : error,
+    });
+  }
+};
+
+export const eventController = {
+  createEvent,
+  getAllEvents,
+  deleteEvent,
+  publishEvent,
+};
