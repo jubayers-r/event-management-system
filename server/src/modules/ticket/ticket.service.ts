@@ -5,7 +5,7 @@ const buyTicket = async (user_id: string, event_id: string) => {
     where: {
       id: event_id,
     },
-    select: { people_capacity: true, status: true },
+    select: { people_capacity: true, status: true, date_time: true },
   });
 
   if (!event) {
@@ -19,6 +19,11 @@ const buyTicket = async (user_id: string, event_id: string) => {
   if (event.people_capacity < 1 || event.status === "BOOKED") {
     throw new Error("Event is sold out");
   }
+
+  if (event.date_time.getTime() >= Date.now()) {
+    throw new Error("Event ticket is no more avilable");
+  }
+
   return await prisma.$transaction(async (tx) => {
     await tx.ticket.upsert({
       where: { id: event_id },
@@ -80,7 +85,6 @@ const cancelTicket = async (user_id: string, ticket_id: string) => {
       where: {
         id: ticket_id,
       },
-
     });
 
     await tx.event.update({
