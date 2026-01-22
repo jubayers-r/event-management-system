@@ -1,0 +1,37 @@
+model Event {
+    id              String      @id @default(uuid())
+    name            String
+    date_time       DateTime
+    location        String
+    category        String?
+    people_capacity Int
+    description     String?
+    image           String?
+    joining_fee     Int
+    status          EventStatus @default(DRAFT)
+
+    // Relationship to the primary Host
+    host   User   @relation(name: "EventHost", fields: [hostId], references: [id])
+    hostId String
+
+    // Relationship to the primary Manager
+    manager   User   @relation(name: "EventManager", fields: [managerId], references: [id])
+    managerId String
+
+    // Lists of users playing different roles
+    attendees User[]   @relation(name: "EventAttendees")
+    tickets   Ticket[]
+
+    created_at DateTime @default(now())
+    updated_at DateTime @updatedAt
+
+    @@index([managerId])
+    @@index([hostId])
+    @@map("event")
+}
+
+enum EventStatus {
+    DRAFT
+    ACTIVE
+    BOOKED
+}
