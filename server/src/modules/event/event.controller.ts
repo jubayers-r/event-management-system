@@ -23,7 +23,7 @@ const getAllEvents = async (req: Request, res: Response) => {
     const result = await eventService.getAllEvents();
     res.status(201).json({
       success: true,
-      message: "Event created successfully",
+      message: "Event retrived successfully",
       data: result,
     });
   } catch (error) {

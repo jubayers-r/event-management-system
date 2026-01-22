@@ -6,7 +6,11 @@ const createEvent = async (payload: any, hostId: string) => {
   });
 };
 const getAllEvents = async () => {
-  return await prisma.event.findMany();
+  return await prisma.event.findMany({
+    where: {
+      status: "ACTIVE",
+    },
+  });
 };
 
 const deleteEvent = async (userId: string, event_id: string) => {
