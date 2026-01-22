@@ -3,7 +3,7 @@ import { eventService } from "./event.service";
 
 const createEvent = async (req: Request, res: Response) => {
   try {
-    const result = await eventService.createEvent({ ...req.body });
+    const result = await eventService.createEvent(req.body, req.user!.id);
     res.status(201).json({
       success: true,
       message: "Event created successfully",
@@ -34,5 +34,24 @@ const getAllEvents = async (req: Request, res: Response) => {
     });
   }
 };
+const deleteEvent = async (req: Request, res: Response) => {
+  try {
+    const result = await eventService.deleteEvent(
+      req.user!.id,
+      req.body.event_id,
+    );
+    res.status(201).json({
+      success: true,
+      message: "Event deleted successfully",
+      data: result,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to delete event",
+      error: error instanceof Error ? error.message : error,
+    });
+  }
+};
 
-export const eventController = { createEvent, getAllEvents };
+export const eventController = { createEvent, getAllEvents, deleteEvent };

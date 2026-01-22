@@ -12,4 +12,10 @@ router.post(
 
 router.get("/", eventController.getAllEvents);
 
+router.delete(
+  "/delete",
+  authorization(UserRole.HOST, UserRole.MANAGER),
+  eventController.deleteEvent,
+);
+
 export const eventRoutes = router;
