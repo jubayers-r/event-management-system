@@ -4,7 +4,7 @@ import { auth } from "../lib/auth";
 export enum UserRole {
   HOST = "HOST",
   USER = "USER",
-  ADMIN = "ADMIN",
+  MANAGER = "MANAGER",
 }
 
 const authorization = (...roles: UserRole[]) => {
