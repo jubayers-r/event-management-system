@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "typeRoots": ["./node_modules/@types", "./src/types"],
     // Environment setup & latest features
     "lib": ["ESNext"],
     "target": "es2023",
@@ -28,6 +29,6 @@
     "noUnusedParameters": false,
     "noPropertyAccessFromIndexSignature": false
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist"]
+  "include": ["src/**/*", "types/express.d.ts"],
+  "exclude": ["node_modules", "dist", "generated/prisma"]
 }
