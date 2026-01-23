@@ -76,9 +76,27 @@ const publishEvent = async (req: Request, res: Response) => {
   }
 };
 
+const editEvent = async (req: Request, res: Response) => {
+  try {
+    const result = await eventService.editEvent(req.body);
+    return res.status(201).json({
+      success: true,
+      message: "Event edited successfully",
+      data: result,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Failed edit the event",
+      error: error instanceof Error ? error.message : error,
+    });
+  }
+};
+
 export const eventController = {
   createEvent,
   getAllEvents,
   deleteEvent,
   publishEvent,
+  editEvent,
 };

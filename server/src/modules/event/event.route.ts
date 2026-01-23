@@ -23,4 +23,10 @@ router.patch(
   eventController.publishEvent,
 );
 
+router.patch(
+  "/edit",
+  authorization(UserRole.HOST, UserRole.MANAGER),
+  eventController.editEvent,
+);
+
 export const eventRoutes = router;

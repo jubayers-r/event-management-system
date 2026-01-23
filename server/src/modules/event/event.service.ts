@@ -2,7 +2,7 @@ import { prisma } from "../../lib/prisma";
 
 const createEvent = async (payload: any, hostId: string) => {
   const result = await prisma.event.create({
-    data: { ...payload, hostId },
+    data: { ...payload, hostId, status: "DRAFT" },
   });
 
   await prisma.user.updateMany({
@@ -54,7 +54,7 @@ const deleteEvent = async (userId: string, event_id: string) => {
   }
 };
 
-const publishEvent = async (userId: string, event_id: string) => {
+const publishEvent = async (event_id: string) => {
   const eventInfo = await prisma.event.findUnique({
     where: {
       id: event_id,
@@ -79,9 +79,26 @@ const publishEvent = async (userId: string, event_id: string) => {
   });
 };
 
+const editEvent = async (payload: any) => {
+  if (!payload.id) {
+    throw new Error("Event ID is required");
+  }
+
+  return await prisma.event.update({
+    where: {
+      id: payload.id,
+    },
+    data: {
+      ...payload,
+      status: "DRAFT",
+    },
+  });
+};
+
 export const eventService = {
   createEvent,
   getAllEvents,
   deleteEvent,
   publishEvent,
+  editEvent,
 };
