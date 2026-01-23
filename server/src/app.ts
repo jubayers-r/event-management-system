@@ -6,10 +6,17 @@ import { auth } from "./lib/auth";
 import { eventRoutes } from "./modules/event/event.route";
 import { ticketRoutes } from "./modules/ticket/ticket.route";
 import { userRoutes } from "./modules/user/user.route";
-import { stripeRoutes } from "./modules/stripe/stripe.route";
 import webhookStripe from "./lib/webhookStripe";
 
 const app: Application = express();
+
+app.post(
+  "/api/webhook",
+  express.raw({
+    type: "application/json",
+  }),
+  webhookStripe,
+);
 
 app.use(express.json());
 app.use(
@@ -24,13 +31,5 @@ app.all("/api/auth/*splat", toNodeHandler(auth));
 app.use("/api/event", eventRoutes);
 app.use("/api/ticket", ticketRoutes);
 app.use("/api/user", userRoutes);
-app.use("/api/stripe", stripeRoutes);
-app.post(
-  "/api/webhook",
-  express.raw({
-    type: "application/json",
-  }),
-  webhookStripe,
-);
 
 export default app;

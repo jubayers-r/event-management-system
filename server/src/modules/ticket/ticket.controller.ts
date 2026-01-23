@@ -8,13 +8,13 @@ const buyTicket = async (req: Request, res: Response) => {
       req.body.event_id,
     );
 
-    res.status(201).json({
+    return res.status(201).json({
       success: true,
       message: "Ticket bought successfully",
       data: result,
     });
   } catch (error) {
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Failed to buy ticket",
       error: error instanceof Error ? error.message : error,

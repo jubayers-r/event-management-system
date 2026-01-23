@@ -1,11 +1,18 @@
 import { prisma } from "../../lib/prisma";
+import { stripe } from "../../lib/stripe";
 
 const buyTicket = async (user_id: string, event_id: string) => {
   const event = await prisma.event.findUniqueOrThrow({
     where: {
       id: event_id,
+      people_capacity: { gt: 0 },
     },
-    select: { people_capacity: true, status: true, date_time: true },
+    select: {
+      people_capacity: true,
+      status: true,
+      date_time: true,
+      joining_fee: true,
+    },
   });
 
   if (!event) {
@@ -20,30 +27,62 @@ const buyTicket = async (user_id: string, event_id: string) => {
     throw new Error("Event is sold out");
   }
 
-  if (event.date_time.getTime() >= Date.now()) {
+  if (event.date_time.getTime() <= Date.now()) {
     throw new Error("Event ticket is no more avilable");
   }
 
+  const user = await prisma.user.findFirst({
+    where: {
+      id: user_id,
+    },
+    select: {
+      stripeCustomerId: true,
+    },
+  });
+
+  if (user?.stripeCustomerId) {
+   console.log( user.stripeCustomerId);
+  }
+
   return await prisma.$transaction(async (tx) => {
-    await tx.ticket.upsert({
-      where: { id: event_id },
-      create: {
+    const newTicket = await tx.ticket.create({
+      data: {
         user_id,
         event_id,
-      },
-      update: {
-        user_id,
-        event_id,
+        amount: event.joining_fee,
+        currency: "usd",
+        status: "PENDING",
       },
     });
 
+    const intite = await stripe.paymentIntents.create({
+      amount: event.joining_fee * 100,
+
+      currency: "usd",
+      // for testing
+      // confirmation_method: "manual",
+      automatic_payment_methods: {
+        enabled: true,
+        allow_redirects: "never",
+      },
+      metadata: {
+        orderId: newTicket.id,
+      },
+      //for testing
+      confirm: false,
+    });
+
     await tx.event.update({
-      where: { id: event_id },
+      where: { id: event_id, people_capacity: { gt: 0 } },
       data: {
         people_capacity: {
           decrement: 1,
         },
       },
+    });
+    // for testing purpose onmly
+    await stripe.paymentIntents.confirm(intite.id, {
+      payment_method: "pm_card_visa",
     });
   });
 };
@@ -98,4 +137,17 @@ const cancelTicket = async (user_id: string, ticket_id: string) => {
   });
 };
 
-export const ticketService = { buyTicket, cancelTicket };
+const paymentSuccessful = async (
+  orderId: string,
+  payment_intent_id: string,
+) => {
+  await prisma.ticket.update({
+    where: { id: orderId },
+    data: {
+      status: "PAID",
+      paymentIntentId: payment_intent_id,
+    },
+  });
+};
+
+export const ticketService = { buyTicket, cancelTicket, paymentSuccessful };

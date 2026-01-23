@@ -1,11 +1,27 @@
+enum TicketStatus {
+    PENDING
+    PAID
+    CANCELLED
+}
+
 model Ticket {
-    id         String   @id @default(uuid())
-    user       User     @relation(fields: [user_id], references: [id])
-    user_id    String
+    id       String  @id @default(uuid())
+    user     User    @relation(fields: [user_id], references: [id])
+    user_id  String
+    event    Event   @relation(fields: [event_id], references: [id])
+    event_id String
+    isActive Boolean @default(false)
+
+    //stripe addition
+
+    amount          Int
+    currency        String
+    paymentIntentId String?
+    status          TicketStatus @default(PENDING)
+
+    messages Message[]
+
     created_at DateTime @default(now())
-    event      Event    @relation(fields: [event_id], references: [id])
-    event_id   String
-    isActive   Boolean  @default(false)
 
     @@map("ticket")
 }
