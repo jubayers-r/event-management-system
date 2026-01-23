@@ -28,30 +28,30 @@ const getAllEvents = async () => {
 };
 
 const deleteEvent = async (userId: string, event_id: string) => {
-  const eventInfo = await prisma.event.findUnique({
-    where: {
-      id: event_id,
-    },
-    select: {
-      hostId: true,
-    },
+  // 1. Fetch the requester's role
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { role: true },
   });
 
-  if (!eventInfo) {
-    throw new Error("event doesnt exist");
-  }
+  // 2. Define the deletion criteria
+  // If ADMIN, delete by ID only. If not, delete by ID + hostId.
+  const deleteCriteria =
+    user?.role === "MANAGER"
+      ? { id: event_id }
+      : { id: event_id, hostId: userId };
 
-  if (eventInfo?.hostId !== userId) {
-    throw new Error(
-      "Unauthtorized access detected, you cannot delete this event, only the creator can",
-    );
+  try {
+    return await prisma.event.delete({
+      where: deleteCriteria,
+    });
+  } catch (error: any) {
+    // P2025 = Record not found (either ID is wrong or hostId didn't match)
+    if (error.code === "P2025") {
+      throw new Error("Unauthorized or Event not found");
+    }
+    throw error;
   }
-
-  return await prisma.event.delete({
-    where: {
-      id: event_id,
-    },
-  });
 };
 
 const publishEvent = async (userId: string, event_id: string) => {
