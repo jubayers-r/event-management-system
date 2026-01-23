@@ -19,6 +19,14 @@ export const auth = betterAuth({
         input: false,
         defaultValue: UserRole.USER,
       },
+      attendingEventId: {
+        type: "string",
+        required: false,
+      },
+      stripeCustomerId: {
+        type: "string",
+        required: false,
+      },
     },
   },
   emailAndPassword: {
