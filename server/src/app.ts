@@ -7,6 +7,8 @@ import { eventRoutes } from "./modules/event/event.route";
 import { ticketRoutes } from "./modules/ticket/ticket.route";
 import { userRoutes } from "./modules/user/user.route";
 import webhookStripe from "./lib/webhookStripe";
+import { createChat } from "./modules/chat/chat.controller";
+import authorization from "./middleware/authorization";
 
 const app: Application = express();
 
@@ -31,5 +33,6 @@ app.all("/api/auth/*splat", toNodeHandler(auth));
 app.use("/api/event", eventRoutes);
 app.use("/api/ticket", ticketRoutes);
 app.use("/api/user", userRoutes);
+app.post("/api/chat", authorization(), createChat);
 
 export default app;

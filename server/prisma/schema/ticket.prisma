@@ -5,12 +5,13 @@ enum TicketStatus {
 }
 
 model Ticket {
-    id       String  @id @default(uuid())
-    user     User    @relation(fields: [user_id], references: [id])
-    user_id  String
-    event    Event   @relation(fields: [event_id], references: [id])
-    event_id String
-    isActive Boolean @default(false)
+    id         String   @id @default(uuid())
+    user       User     @relation(fields: [user_id], references: [id])
+    user_id    String
+    event      Event    @relation(fields: [event_id], references: [id])
+    event_id   String
+    isActive   Boolean  @default(false)
+    created_at DateTime @default(now())
 
     //stripe addition
 
@@ -19,9 +20,9 @@ model Ticket {
     paymentIntentId String?
     status          TicketStatus @default(PENDING)
 
+    //chat
     messages Message[]
-
-    created_at DateTime @default(now())
+    chats    Chat[]
 
     @@map("ticket")
 }

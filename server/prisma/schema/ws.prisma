@@ -1,0 +1,34 @@
+model Chat {
+    id        String   @id @default(cuid())
+    ticketId  String
+    createdAt DateTime @default(now())
+
+    ticket   Ticket       @relation(fields: [ticketId], references: [id])
+    members  ChatMember[]
+    messages Message[]
+}
+
+model ChatMember {
+    chatId String
+    userId String
+
+    chat Chat @relation(fields: [chatId], references: [id])
+    user User @relation(fields: [userId], references: [id])
+
+    @@id([chatId, userId])
+}
+
+model Message {
+    id        String   @id @default(cuid())
+    chatId    String
+    senderId  String
+    content   String
+    createdAt DateTime @default(now())
+
+    chat     Chat    @relation(fields: [chatId], references: [id])
+    sender   User    @relation(fields: [senderId], references: [id])
+    ticket   Ticket? @relation(fields: [ticketId], references: [id])
+    ticketId String?
+
+    @@index([chatId, createdAt])
+}

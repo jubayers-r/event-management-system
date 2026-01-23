@@ -27,8 +27,15 @@ model User {
     attendingEventId String?
     attendingEvent   Event?  @relation(name: "EventAttendees", fields: [attendingEventId], references: [id])
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+    //stripe
+    stripeCustomerId String? @unique
+
+    //socketio
+    messages Message[]
+
+    createdAt   DateTime     @default(now())
+    updatedAt   DateTime     @updatedAt
+    chatMembers ChatMember[]
 
     @@map("user")
 }
