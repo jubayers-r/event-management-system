@@ -1,9 +1,23 @@
 import { prisma } from "../../lib/prisma";
 
 const createEvent = async (payload: any, hostId: string) => {
-  return await prisma.event.create({
+  const result = await prisma.event.create({
     data: { ...payload, hostId },
   });
+
+  await prisma.user.updateMany({
+    where: {
+      id: hostId,
+      role: {
+        notIn: ["HOST", "MANAGER"],
+      },
+    },
+    data: {
+      role: "HOST",
+    },
+  });
+
+  return result;
 };
 const getAllEvents = async () => {
   return await prisma.event.findMany({

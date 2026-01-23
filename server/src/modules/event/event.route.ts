@@ -6,7 +6,7 @@ const router = Router();
 
 router.post(
   "/",
-  authorization(UserRole.HOST, UserRole.MANAGER),
+  authorization(), //any user can post an event
   eventController.createEvent,
 );
 
@@ -19,7 +19,7 @@ router.delete(
 );
 router.patch(
   "/publish",
-  authorization(UserRole.HOST, UserRole.MANAGER),
+  authorization(UserRole.MANAGER),
   eventController.publishEvent,
 );
 
