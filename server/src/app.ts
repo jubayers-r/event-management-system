@@ -6,8 +6,10 @@ import { auth } from "./lib/auth";
 import { eventRoutes } from "./modules/event/event.route";
 import { ticketRoutes } from "./modules/ticket/ticket.route";
 import { userRoutes } from "./modules/user/user.route";
+import { stripeRoutes } from "./modules/stripe/stripe.route";
 
 const app: Application = express();
+
 app.use(express.json());
 app.use(
   cors({
@@ -21,5 +23,7 @@ app.all("/api/auth/*splat", toNodeHandler(auth));
 app.use("/api/event", eventRoutes);
 app.use("/api/ticket", ticketRoutes);
 app.use("/api/user", userRoutes);
+
+app.use("/api/stripe", stripeRoutes);
 
 export default app;
