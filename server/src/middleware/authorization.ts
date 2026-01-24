@@ -15,14 +15,14 @@ const authorization = (...roles: UserRole[]) => {
       });
 
       if (!session) {
-        res.status(403).json({
+        return res.status(403).json({
           success: false,
           message: "unauthorized access",
         });
       }
 
       if (!session?.user.emailVerified) {
-        res.status(403).json({
+        return res.status(403).json({
           success: false,
           message: "email not verified",
         });
@@ -36,7 +36,7 @@ const authorization = (...roles: UserRole[]) => {
       };
 
       if (roles.length && !roles.includes(req.user.role as UserRole)) {
-        res.status(403).json({
+        return res.status(403).json({
           success: false,
           message:
             "Forbidden! You don't have permission to access this resources!",

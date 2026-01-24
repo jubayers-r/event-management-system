@@ -2,6 +2,7 @@ enum TicketStatus {
     PENDING
     PAID
     CANCELLED
+    FAILED
 }
 
 model Ticket {

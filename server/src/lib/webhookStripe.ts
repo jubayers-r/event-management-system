@@ -19,22 +19,23 @@ const webhookStripe = async (req: Request, res: Response) => {
   }
 
   const payment_intent = event.data.object as Stripe.PaymentIntent;
+  const orderId = payment_intent.metadata.orderId;
 
   console.log(`New event recived: ${event.type}`);
 
-  if (event.type === "payment_intent.succeeded") {
-    const orderId = payment_intent.metadata.orderId;
 
-    await ticketService.paymentSuccessful(orderId!, payment_intent.id);
+  switch (event.type) {
+    case "payment_intent.succeeded":
+      await ticketService.paymentSuccessful(orderId!, payment_intent.id);
+      console.log({ id: payment_intent.id });
+      break;
 
-    console.log({ id: payment_intent.id });
+    case "payment_intent.payment_failed":
+      // FIX: Add logic to set ticket status to 'FAILED'
+      // and increment event capacity back +1
+      await ticketService.handlePaymentFailure(orderId!);
+      break;
   }
-
-  // if (event.type === "charge.succeeded") {
-  //   const charge = event.data.object;
-
-  //   console.log({ charge });
-  // }
 
   res.json({ recived: true });
 };

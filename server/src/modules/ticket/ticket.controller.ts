@@ -5,7 +5,7 @@ const buyTicket = async (req: Request, res: Response) => {
   try {
     const result = await ticketService.buyTicket(
       req.user!.id,
-      req.body.event_id,
+      req.body.ticket_id,
     );
 
     return res.status(201).json({
@@ -13,7 +13,18 @@ const buyTicket = async (req: Request, res: Response) => {
       message: "Ticket bought successfully",
       data: result,
     });
-  } catch (error) {
+  } catch (error: any) {
+
+    // Specific error mapping
+    if (error.message === "SOLD_OUT" || error.code === "P2025") {
+      // P2025 is Prisma "Record not found"
+      return res.status(400).json({
+        success: false,
+        message: "This event is sold out!",
+        errorCode: "ERR_SOLD_OUT",
+      });
+    }
+
     return res.status(500).json({
       success: false,
       message: "Failed to buy ticket",
@@ -29,13 +40,13 @@ const cancelTicket = async (req: Request, res: Response) => {
       req.body.ticket_id,
     );
 
-    res.status(201).json({
+    return res.status(201).json({
       success: true,
       message: "Ticket cancelled successfully",
       data: result,
     });
   } catch (error) {
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Failed to cancellation ticket",
       error: error instanceof Error ? error.message : error,
@@ -43,4 +54,28 @@ const cancelTicket = async (req: Request, res: Response) => {
   }
 };
 
-export const ticketController = { buyTicket, cancelTicket };
+const getMyTickets = async (req: Request, res: Response) => {
+  try {
+    const result = await ticketService.getMyTickets(req.user!.id);
+    if (!result.length) {
+      return res.status(404).json({
+        success: false,
+        message: "No results found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Found events succesfully",
+      data: result,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Failed to create event",
+      error: error instanceof Error ? error.message : error,
+    });
+  }
+};
+
+export const ticketController = { buyTicket, cancelTicket, getMyTickets  };

@@ -15,4 +15,10 @@ router.post(
   ticketController.cancelTicket,
 );
 
+router.get(
+  "/my-tickets",
+  authorization(UserRole.USER, UserRole.HOST, UserRole.MANAGER),
+  ticketController.getMyTickets,
+);
+
 export const ticketRoutes = router;

@@ -5,7 +5,6 @@ const buyTicket = async (user_id: string, event_id: string) => {
   const event = await prisma.event.findUniqueOrThrow({
     where: {
       id: event_id,
-      people_capacity: { gt: 0 },
     },
     select: {
       people_capacity: true,
@@ -14,6 +13,8 @@ const buyTicket = async (user_id: string, event_id: string) => {
       joining_fee: true,
     },
   });
+
+  if (event.people_capacity < 1) throw new Error("SOLD_OUT");
 
   if (!event) {
     throw new Error("The event does not exist");
@@ -40,11 +41,22 @@ const buyTicket = async (user_id: string, event_id: string) => {
     },
   });
 
-  if (user?.stripeCustomerId) {
-   console.log( user.stripeCustomerId);
-  }
+  // if (user?.stripeCustomerId) {
+  //   console.log(user.stripeCustomerId);
+  // }
 
   return await prisma.$transaction(async (tx) => {
+    // 1. Check & Lock Capacity inside transaction
+    await tx.event.update({
+      where: { id: event_id, people_capacity: { gt: 0 } },
+      data: {
+        people_capacity: {
+          decrement: 1,
+        },
+      },
+    });
+
+    // 2. Create Ticket
     const newTicket = await tx.ticket.create({
       data: {
         user_id,
@@ -54,36 +66,21 @@ const buyTicket = async (user_id: string, event_id: string) => {
         status: "PENDING",
       },
     });
-
-    const intite = await stripe.paymentIntents.create({
+    // 3. Create Stripe Intent
+    const intent = await stripe.paymentIntents.create({
       amount: event.joining_fee * 100,
-
       currency: "usd",
-      // for testing
-      // confirmation_method: "manual",
-      automatic_payment_methods: {
-        enabled: true,
-        allow_redirects: "never",
-      },
+      automatic_payment_methods: { enabled: true },
       metadata: {
         orderId: newTicket.id,
       },
-      //for testing
-      confirm: false,
     });
 
-    await tx.event.update({
-      where: { id: event_id, people_capacity: { gt: 0 } },
-      data: {
-        people_capacity: {
-          decrement: 1,
-        },
-      },
-    });
-    // for testing purpose onmly
-    await stripe.paymentIntents.confirm(intite.id, {
-      payment_method: "pm_card_visa",
-    });
+    return {
+      ticketId: newTicket.id,
+      clientSecret: intent.client_secret,
+      status: "PAYMENT_REQUIRED",
+    };
   });
 };
 
@@ -92,6 +89,7 @@ const cancelTicket = async (user_id: string, ticket_id: string) => {
     where: {
       id: ticket_id,
       user_id,
+      OR: [{ status: "PENDING" }, { status: "PAID" }],
     },
     select: {
       event_id: true,
@@ -120,9 +118,12 @@ const cancelTicket = async (user_id: string, ticket_id: string) => {
   }
 
   return await prisma.$transaction(async (tx) => {
-    await tx.ticket.delete({
+    await tx.ticket.update({
       where: {
         id: ticket_id,
+      },
+      data: {
+        status: "CANCELLED",
       },
     });
 
@@ -135,6 +136,27 @@ const cancelTicket = async (user_id: string, ticket_id: string) => {
       },
     });
   });
+};
+
+const handlePaymentFailure = async (orderId: string) => {
+  const ticket = await prisma.ticket.findUnique({
+    where: { id: orderId },
+    select: { event_id: true, status: true },
+  });
+
+  // Only restore capacity if the ticket wasn't already processed
+  if (ticket && ticket.status === "PENDING") {
+    await prisma.$transaction([
+      prisma.ticket.update({
+        where: { id: orderId },
+        data: { status: "FAILED" },
+      }),
+      prisma.event.update({
+        where: { id: ticket.event_id },
+        data: { people_capacity: { increment: 1 } },
+      }),
+    ]);
+  }
 };
 
 const paymentSuccessful = async (
@@ -150,4 +172,18 @@ const paymentSuccessful = async (
   });
 };
 
-export const ticketService = { buyTicket, cancelTicket, paymentSuccessful };
+const getMyTickets = async (user_id: string) => {
+  return await prisma.ticket.findMany({
+    where: {
+      user_id,
+    },
+  });
+};
+
+export const ticketService = {
+  buyTicket,
+  cancelTicket,
+  paymentSuccessful,
+  handlePaymentFailure,
+  getMyTickets,
+};

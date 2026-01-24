@@ -59,13 +59,13 @@ const deleteEvent = async (req: Request, res: Response) => {
 const publishEvent = async (req: Request, res: Response) => {
   try {
     const result = await eventService.publishEvent(req.body.event_id);
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       message: "Event published successfully",
       data: result,
     });
   } catch (error) {
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Failed to published event",
       error: error instanceof Error ? error.message : error,
