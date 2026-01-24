@@ -22,7 +22,11 @@ app.post(
 app.use(express.json());
 app.use(
   cors({
-    origin: process.env.APP_URL,
+    origin: [
+      process.env.APP_URL!,
+      "http://localhost:3001",
+      "http://localhost:3002",
+    ],
     credentials: true,
   }),
 );
