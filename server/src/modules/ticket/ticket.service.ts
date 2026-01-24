@@ -89,15 +89,18 @@ const cancelTicket = async (user_id: string, ticket_id: string) => {
     where: {
       id: ticket_id,
       user_id,
-      OR: [{ status: "PENDING" }, { status: "PAID" }],
+      status: "PAID",
     },
     select: {
       event_id: true,
+      status: true,
+      paymentIntentId: true,
     },
   });
 
+
   if (!isExist) {
-    throw new Error("user didnt bought the ticket");
+    throw new Error("Ticket not found or cannot be cancelled");
   }
 
   const eventInfo = await prisma.event.findFirst({
@@ -135,6 +138,20 @@ const cancelTicket = async (user_id: string, ticket_id: string) => {
         },
       },
     });
+    // Handle Stripe Refund if the ticket was already paid
+    if (isExist.status === "PAID" && isExist.paymentIntentId) {
+      try {
+        await stripe.refunds.create({
+          payment_intent: isExist.paymentIntentId,
+          reason: "requested_by_customer",
+        });
+      } catch (error) {
+        // Log this specifically! If DB updates but Stripe fails,
+        // you owe someone money manually.
+        console.error("Stripe Refund Failed:", error);
+        throw new Error("Refund failed, please contact support.");
+      }
+    }
   });
 };
 

@@ -23,7 +23,6 @@ const webhookStripe = async (req: Request, res: Response) => {
 
   console.log(`New event recived: ${event.type}`);
 
-
   switch (event.type) {
     case "payment_intent.succeeded":
       await ticketService.paymentSuccessful(orderId!, payment_intent.id);
@@ -34,6 +33,14 @@ const webhookStripe = async (req: Request, res: Response) => {
       // FIX: Add logic to set ticket status to 'FAILED'
       // and increment event capacity back +1
       await ticketService.handlePaymentFailure(orderId!);
+      break;
+
+    case "charge.refunded":
+      // The payment_intent ID is also available here to find the ticket
+      const charge = event.data.object as Stripe.Charge;
+      console.log(`Refund issued for charge: ${charge.id}`);
+      // Optional: Update ticket status to "REFUNDED" if you want
+      // to distinguish it from a generic "CANCELLED"
       break;
   }
 

@@ -5,7 +5,7 @@ const buyTicket = async (req: Request, res: Response) => {
   try {
     const result = await ticketService.buyTicket(
       req.user!.id,
-      req.body.ticket_id,
+      req.body.event_id,
     );
 
     return res.status(201).json({
@@ -35,6 +35,7 @@ const buyTicket = async (req: Request, res: Response) => {
 
 const cancelTicket = async (req: Request, res: Response) => {
   try {
+
     const result = await ticketService.cancelTicket(
       req.user!.id,
       req.body.ticket_id,
