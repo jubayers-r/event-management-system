@@ -33,7 +33,7 @@ const Signup1 = ({
   className,
 }: Signup1Props) => {
   return (
-    <section className={cn("h-screen bg-muted", className)}>
+    <section className={cn("h-screen", className)}>
       <div className="flex h-full items-center justify-center">
         {/* Logo */}
         <div className="flex flex-col items-center gap-6 lg:justify-start">
