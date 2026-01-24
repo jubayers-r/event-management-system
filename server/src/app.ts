@@ -26,6 +26,7 @@ app.use(
       process.env.APP_URL!,
       "http://localhost:3001",
       "http://localhost:3002",
+      "http://10.0.20.135:5000",
     ],
     credentials: true,
   }),
