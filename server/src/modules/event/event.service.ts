@@ -80,17 +80,18 @@ const publishEvent = async (event_id: string) => {
 };
 
 const editEvent = async (payload: any) => {
-  if (!payload.id) {
+  const { id, ...updateData } = payload;
+
+  if (!id) {
     throw new Error("Event ID is required");
   }
 
   return await prisma.event.update({
     where: {
-      id: payload.id,
+      id,
     },
     data: {
-      ...payload,
-      status: "DRAFT",
+      ...updateData,
     },
   });
 };

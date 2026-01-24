@@ -13,7 +13,7 @@ router.post(
 router.get("/", eventController.getAllEvents);
 
 router.delete(
-  "/delete",
+  "/:id",
   authorization(UserRole.HOST, UserRole.MANAGER),
   eventController.deleteEvent,
 );
@@ -31,7 +31,7 @@ router.patch(
 
 router.get(
   "/my-events",
-  authorization(UserRole.HOST, UserRole.MANAGER),
+  authorization(),
   eventController.myEvents,
 );
 
