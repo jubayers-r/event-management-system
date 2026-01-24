@@ -8,14 +8,14 @@ model User {
     id            String  @id @default(cuid())
     name          String
     email         String  @unique
+    password      String
     emailVerified Boolean @default(false)
     image         String?
     role          Role    @default(USER)
 
     // Relations
-    sessions Session[]
-    accounts Account[]
-    tickets  Ticket[]
+
+    tickets Ticket[]
 
     // Events where this user is the MAIN Host
     hostedEvents Event[] @relation(name: "EventHost")
@@ -30,12 +30,12 @@ model User {
     //stripe
     stripeCustomerId String? @unique
 
-    //socketio
-    messages Message[]
-
-    createdAt   DateTime     @default(now())
-    updatedAt   DateTime     @updatedAt
+    //ws
+    messages    Message[]
     chatMembers ChatMember[]
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
 
     @@map("user")
 }
