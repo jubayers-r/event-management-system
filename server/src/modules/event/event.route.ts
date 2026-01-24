@@ -29,4 +29,10 @@ router.patch(
   eventController.editEvent,
 );
 
+router.get(
+  "/my-events",
+  authorization(UserRole.HOST, UserRole.MANAGER),
+  eventController.myEvents,
+);
+
 export const eventRoutes = router;

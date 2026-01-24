@@ -95,10 +95,19 @@ const editEvent = async (payload: any) => {
   });
 };
 
+const myEvents = async (userId: string) => {
+  return await prisma.event.findMany({
+    where: {
+      hostId: userId,
+    },
+  });
+};
+
 export const eventService = {
   createEvent,
   getAllEvents,
   deleteEvent,
   publishEvent,
   editEvent,
+  myEvents,
 };
