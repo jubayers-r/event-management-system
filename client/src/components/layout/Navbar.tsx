@@ -1,5 +1,3 @@
-"use client";
-
 import { Book, Menu, Sunset, Trees, Zap } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -27,6 +25,8 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import Link from "next/link";
+import LogoutButton from "../LogoutButton";
+import { cookies } from "next/headers";
 
 interface MenuItem {
   title: string;
@@ -58,7 +58,7 @@ interface Navbar1Props {
   };
 }
 
-const Navbar1 = ({
+const Navbar1 = async ({
   logo = {
     url: "https://www.shadcnblocks.com",
     src: "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/logos/shadcnblockscom-icon.svg",
@@ -66,7 +66,7 @@ const Navbar1 = ({
     title: "Shadcnblocks.com",
   },
   menu = [
-    { title: "Events", url: "/events" },
+    { title: "Events", url: "/event" },
     { title: "My Events", url: "/my-events" },
     { title: "Manage Events", url: "/managed-events" },
   ],
@@ -76,9 +76,11 @@ const Navbar1 = ({
   },
   className,
 }: Navbar1Props) => {
+  const isLoggedIn = (await cookies()).has("access_token");
+
   return (
     <section className={cn("py-4", className)}>
-      <div className="container">
+      <div className="">
         {/* Desktop Menu */}
         <nav className="hidden items-center justify-between lg:flex">
           <div className="flex items-center gap-6">
@@ -101,18 +103,23 @@ const Navbar1 = ({
               </NavigationMenu>
             </div>
           </div>
-          <div className="flex gap-2">
-            <Button asChild variant="outline" size="sm">
-              <Link href={auth.login.url}>{auth.login.title}</Link>
-            </Button>
-            <Button asChild size="sm">
-              <Link href={auth.signup.url}>{auth.signup.title}</Link>
-            </Button>
-          </div>
+
+          {isLoggedIn ? (
+            <LogoutButton />
+          ) : (
+            <div className="flex gap-2">
+              <Button asChild variant="outline" size="sm">
+                <Link href={auth.login.url}>{auth.login.title}</Link>
+              </Button>
+              <Button asChild size="sm">
+                <Link href={auth.signup.url}>{auth.signup.title}</Link>
+              </Button>
+            </div>
+          )}
         </nav>
 
         {/* Mobile Menu */}
-        <div className="block lg:hidden">
+        <div className="block lg:hidden ">
           <div className="flex items-center justify-between">
             {/* Logo */}
             <Link href={logo.url} className="flex items-center gap-2">

@@ -1,8 +1,11 @@
+"use client";
 import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
+import { useAuth } from "@/hooks/useAuth";
+import { useRouter } from "next/navigation";
 
 interface Login1Props {
   heading?: string;
@@ -34,6 +37,27 @@ const Login1 = ({
   signupUrl = "/signup",
   className,
 }: Login1Props) => {
+  const { signin } = useAuth();
+  const router = useRouter();
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    const formData = new FormData(e.currentTarget);
+
+    try {
+      await signin({
+        email: formData.get("email") as string,
+        password: formData.get("password") as string,
+      });
+
+      router.push("/event");
+      alert("account login successful");
+    } catch (err: any) {
+      alert(err.message);
+    }
+  };
+
   return (
     <section className={cn("h-screen ", className)}>
       <div className="flex h-full items-center justify-center">
@@ -49,21 +73,25 @@ const Login1 = ({
           </Link>
           <div className="flex w-full max-w-sm min-w-sm flex-col items-center gap-y-4 rounded-md border border-muted bg-background px-6 py-8 shadow-md">
             {heading && <h1 className="text-xl font-semibold">{heading}</h1>}
-            <Input
-              type="email"
-              placeholder="Email"
-              className="text-sm"
-              required
-            />
-            <Input
-              type="password"
-              placeholder="Password"
-              className="text-sm"
-              required
-            />
+            <form onSubmit={handleSubmit} className="grid gap-4 w-full">
+              <Input
+                type="email"
+                name="email"
+                placeholder="Email"
+                className="text-sm"
+                required
+              />
+              <Input
+                type="password"
+                name="password"
+                placeholder="Password"
+                className="text-sm"
+                required
+              />
             <Button type="submit" className="w-full">
               {buttonText}
             </Button>
+            </form>
             <Button type="button" className="w-full">
               <Link href={"/"}>
                 <p>Go Back To Home</p>

@@ -1,9 +1,10 @@
-import { SignupForm } from "@/components/layout/signup1";
+import Signup1 from "@/components/layout/signup1";
+
 
 export default function Signup() {
   return (
     <div>
-      <SignupForm />
+      <Signup1 />
     </div>
   );
 }

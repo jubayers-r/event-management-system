@@ -1,19 +1,21 @@
-import { cn } from "@/lib/utils";
+"use client";
 
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/hooks/useAuth";
 
 interface Signup1Props {
   heading?: string;
-  logo: {
+  logo?: {
     url: string;
     src: string;
     alt: string;
     title?: string;
   };
   buttonText?: string;
-  googleText?: string;
   signupText?: string;
   signupUrl?: string;
   className?: string;
@@ -32,53 +34,76 @@ const Signup1 = ({
   signupUrl = "/login",
   className,
 }: Signup1Props) => {
+  const { signup } = useAuth();
+  const router = useRouter();
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    const formData = new FormData(e.currentTarget);
+    const name = formData.get("name") as string;
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
+    const confirmPassword = formData.get("confirmPassword") as string;
+
+    if (password !== confirmPassword) {
+      alert("Passwords do not match");
+      return;
+    }
+
+    try {
+      await signup({ name, email, password });
+      // Move navigation INSIDE the try block so it only happens on success
+      router.push("/login");
+      alert("account creation successful");
+    } catch (err: any) {
+      alert(err.message || "An error occurred during signup");
+    }
+  };
+
   return (
-    <section className={cn("h-screen", className)}>
-      <div className="flex h-full items-center justify-center">
-        {/* Logo */}
-        <div className="flex flex-col items-center gap-6 lg:justify-start">
-          <Link href={logo.url}>
-            <img
-              src={logo.src}
-              alt={logo.alt}
-              title={logo.title}
-              className="h-10 dark:invert"
-            />
-          </Link>
-          <div className="flex w-full max-w-sm min-w-sm flex-col items-center gap-y-4 rounded-md border border-muted bg-background px-6 py-8 shadow-md">
-            {heading && <h1 className="text-xl font-semibold">{heading}</h1>}
-            <Input
-              type="email"
-              placeholder="Email"
-              className="text-sm"
-              required
-            />
-            <Input
-              type="password"
-              placeholder="Password"
-              className="text-sm"
-              required
-            />
-            <Input
-              type="password"
-              placeholder="Confirm Password"
-              className="text-sm"
-              required
-            />
+    <section className={cn("py-32", className)}>
+      <div className="container flex flex-col items-center gap-10">
+        <Link href={logo.url} className="flex items-center gap-2">
+          <img src={logo.src} className="h-8" alt={logo.alt} />
+          <span className="text-xl font-bold">{logo.title}</span>
+        </Link>
+        <div className="w-full max-w-sm rounded-xl border border-border bg-card p-8 shadow-sm">
+          <h1 className="mb-6 text-2xl font-semibold tracking-tight">
+            {heading}
+          </h1>
+          <form onSubmit={handleSubmit} className="grid gap-4">
+            <div className="grid gap-2">
+              <Input name="name" placeholder="Full Name" required />
+            </div>
+            <div className="grid gap-2">
+              <Input name="email" type="email" placeholder="Email" required />
+            </div>
+            <div className="grid gap-2">
+              <Input
+                name="password"
+                type="password"
+                placeholder="Password"
+                required
+              />
+            </div>
+            <div className="grid gap-2">
+              <Input
+                name="confirmPassword"
+                type="password"
+                placeholder="Confirm Password"
+                required
+              />
+            </div>
             <Button type="submit" className="w-full">
               {buttonText}
             </Button>
-            <Button type="button" className="w-full">
-              <Link href={"/"}>
-                <p>Go Back To Home</p>
-              </Link>
-            </Button>
-          </div>
-          <div className="flex justify-center gap-1 text-sm text-muted-foreground">
-            <p>{signupText}</p>
+          </form>
+          <div className="mt-4 text-center text-sm text-muted-foreground">
+            {signupText}{" "}
             <Link
               href={signupUrl}
-              className="font-medium text-primary hover:underline"
+              className="text-primary underline underline-offset-4"
             >
               Login
             </Link>
@@ -89,4 +114,4 @@ const Signup1 = ({
   );
 };
 
-export { Signup1 as SignupForm };
+export default Signup1;
