@@ -25,7 +25,10 @@ type JwtPayload = {
 const authorization = (...roles: UserRole[]) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const token = req.cookies?.access_token;
+      // const token = req.cookies?.access_token;
+      const token = req.headers["authorization"] as string | undefined;
+
+      // console.log({ cookies: req.cookies });
 
       if (!token) {
         return res.status(403).json({
