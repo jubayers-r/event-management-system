@@ -21,7 +21,25 @@ const createEvent = async (req: Request, res: Response) => {
 
 const getAllEvents = async (req: Request, res: Response) => {
   try {
-    const result = await eventService.getAllEvents();
+    const result = await eventService.getAllEvents(req.user!);
+    return res.status(200).json({
+      success: true,
+      message: "Event retrived successfully",
+      data: result,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Failed to get any event",
+      error: error instanceof Error ? error.message : error,
+    });
+  }
+};
+const getOneEvent = async (req: Request, res: Response) => {
+  try {
+    const eventId = req.params.id as string;
+
+    const result = await eventService.getOneEvent(eventId);
     return res.status(200).json({
       success: true,
       message: "Event retrived successfully",
@@ -119,6 +137,7 @@ const myEvents = async (req: Request, res: Response) => {
 export const eventController = {
   createEvent,
   getAllEvents,
+  getOneEvent,
   deleteEvent,
   publishEvent,
   editEvent,

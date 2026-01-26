@@ -5,10 +5,12 @@ import { prisma } from "../lib/prisma";
 /**
  * ROLES
  */
+
 export enum UserRole {
   HOST = "HOST",
   USER = "USER",
   MANAGER = "MANAGER",
+  OPTIONAL = "OPTIONAL",
 }
 
 /**
@@ -28,20 +30,24 @@ const authorization = (...roles: UserRole[]) => {
       // const token = req.cookies?.access_token;
       const token = req.headers["authorization"] as string | undefined;
 
-      // console.log({ cookies: req.cookies });
+      // console.log({ token });
 
-      if (!token) {
+      if (!token && !roles.includes(UserRole.OPTIONAL)) {
         return res.status(403).json({
           success: false,
           message: "Unauthorized",
         });
       }
 
+      if (!token && roles.includes(UserRole.OPTIONAL)) {
+        return next();
+      }
+
       let decoded: JwtPayload;
 
       try {
         decoded = jwt.verify(
-          token,
+          token!,
           process.env.JWT_SECRET as string,
         ) as JwtPayload;
       } catch {
@@ -77,7 +83,15 @@ const authorization = (...roles: UserRole[]) => {
         role: user.role!,
       };
 
-      if (roles.length && !roles.includes(user.role as UserRole)) {
+      console.log({
+        user,
+      });
+
+      if (
+        roles.length &&
+        !roles.includes(UserRole.OPTIONAL) &&
+        !roles.includes(user.role as UserRole)
+      ) {
         return res.status(403).json({
           success: false,
           message:

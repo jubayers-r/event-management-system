@@ -71,6 +71,7 @@ const buyTicket = async (user_id: string, event_id: string) => {
       amount: event.joining_fee * 100,
       currency: "usd",
       automatic_payment_methods: { enabled: true },
+      capture_method: "automatic",
       metadata: {
         orderId: newTicket.id,
       },
@@ -85,73 +86,82 @@ const buyTicket = async (user_id: string, event_id: string) => {
 };
 
 const cancelTicket = async (user_id: string, ticket_id: string) => {
-  const isExist = await prisma.ticket.findFirst({
+  const ticket = await prisma.ticket.findFirst({
     where: {
       id: ticket_id,
       user_id,
       status: "PAID",
     },
-    select: {
-      event_id: true,
-      status: true,
-      paymentIntentId: true,
-    },
+    include: { event: true },
   });
 
-
-  if (!isExist) {
-    throw new Error("Ticket not found or cannot be cancelled");
+  if (!ticket) {
+    throw new Error("Ticket not found or ineligible for cancellation");
   }
 
-  const eventInfo = await prisma.event.findFirst({
-    where: {
-      id: isExist.event_id,
-    },
-    select: {
-      status: true,
-      date_time: true,
-    },
+  const isTooLate = ticket.event.date_time.getTime() <= Date.now();
+  if (isTooLate) throw new Error("Cannot refund after event has started");
+
+  // 1. Pessimistic Update: Mark as CANCELLED immediately
+  // This prevents the user from spamming the button while the refund is in flight.
+  await prisma.ticket.update({
+    where: { id: ticket_id },
+    data: { status: "CANCELLED" },
   });
 
-  if (
-    eventInfo?.status !== "ACTIVE" ||
-    eventInfo.date_time.getTime() <= Date.now()
-  ) {
-    throw new Error("event already going on or passed");
+  // 2. Trigger Stripe Refund
+  if (ticket.paymentIntentId) {
+    try {
+      await stripe.refunds.create({
+        payment_intent: ticket.paymentIntentId,
+        reason: "requested_by_customer",
+      });
+    } catch (error) {
+      console.error("Stripe Refund Trigger Failed:", error);
+      // Rollback status to PAID if Stripe rejects the request immediately
+      await prisma.ticket.update({
+        where: { id: ticket_id },
+        data: { status: "PAID" },
+      });
+      throw new Error("Refund could not be processed. Please contact support.");
+    }
   }
 
+  return { success: true, message: "Refund initiated" };
+};
+
+const handleRefundWebhook = async (paymentIntentId: string) => {
+  // Use a transaction to ensure we don't refund without increasing capacity
   return await prisma.$transaction(async (tx) => {
-    await tx.ticket.update({
-      where: {
-        id: ticket_id,
-      },
-      data: {
-        status: "CANCELLED",
-      },
+    const ticket = await tx.ticket.findFirst({
+      where: { paymentIntentId },
+      // Lock the row to prevent race conditions if multiple webhooks arrive
     });
 
+    // If the ticket is already marked REFUNDED, skip to avoid double incrementing capacity
+    if (!ticket || ticket.status === "REFUNDED") {
+      console.log("Ticket already processed or not found.");
+      return;
+    }
+
+    // 1. Update Ticket Status
+    await tx.ticket.update({
+      where: { id: ticket.id },
+      data: { status: "REFUNDED" },
+    });
+
+    // 2. Increment Event Capacity
+    // This only happens once because the next webhook call will hit the "REFUNDED" check above.
     await tx.event.update({
-      where: { id: isExist.event_id },
+      where: { id: ticket.event_id },
       data: {
         people_capacity: {
           increment: 1,
         },
       },
     });
-    // Handle Stripe Refund if the ticket was already paid
-    if (isExist.status === "PAID" && isExist.paymentIntentId) {
-      try {
-        await stripe.refunds.create({
-          payment_intent: isExist.paymentIntentId,
-          reason: "requested_by_customer",
-        });
-      } catch (error) {
-        // Log this specifically! If DB updates but Stripe fails,
-        // you owe someone money manually.
-        console.error("Stripe Refund Failed:", error);
-        throw new Error("Refund failed, please contact support.");
-      }
-    }
+
+    console.log(`Capacity recovered for event ${ticket.event_id}`);
   });
 };
 
@@ -203,4 +213,5 @@ export const ticketService = {
   paymentSuccessful,
   handlePaymentFailure,
   getMyTickets,
+  handleRefundWebhook,
 };

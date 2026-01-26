@@ -41,6 +41,12 @@ const webhookStripe = async (req: Request, res: Response) => {
       console.log(`Refund issued for charge: ${charge.id}`);
       // Optional: Update ticket status to "REFUNDED" if you want
       // to distinguish it from a generic "CANCELLED"
+      if (payment_intent.id) {
+        await ticketService.handleRefundWebhook(payment_intent.id);
+        console.log(
+          `Successfully processed refund for PI: ${payment_intent.id}`,
+        );
+      }
       break;
   }
 

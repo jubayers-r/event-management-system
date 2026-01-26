@@ -12,3 +12,10 @@ declare global {
     }
   }
 }
+
+export interface jwtUser {
+  id: string;
+  email: string;
+  name: string;
+  role: string;
+}

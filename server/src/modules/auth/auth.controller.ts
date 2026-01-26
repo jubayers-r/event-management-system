@@ -44,7 +44,7 @@ const create = async (req: Request, res: Response) => {
     if (error.code === "P2002") {
       return badRequest(res, "User already exists");
     }
-    return badRequest(res, "bad input");
+    return badRequest(res, error.message);
   }
 };
 
@@ -93,7 +93,7 @@ const login = async (req: Request, res: Response) => {
       },
       process.env.JWT_SECRET as string,
       {
-        expiresIn: "15m",
+        expiresIn: "7h",
       },
     );
 

@@ -1,4 +1,6 @@
+import { jwtUser } from "../../../types/express";
 import { prisma } from "../../lib/prisma";
+import { UserRole } from "../../middleware/authorization";
 
 const createEvent = async (payload: any, hostId: string) => {
   const result = await prisma.event.create({
@@ -19,14 +21,19 @@ const createEvent = async (payload: any, hostId: string) => {
 
   return result;
 };
-const getAllEvents = async () => {
+const getAllEvents = async (user: jwtUser) => {
   return await prisma.event.findMany({
     where: {
-      status: "ACTIVE",
+      ...(user?.role !== UserRole.MANAGER && { status: "ACTIVE" }),
     },
   });
 };
 
+const getOneEvent = async (event_id: string) => {
+  return await prisma.event.findFirstOrThrow({
+    where: { id: event_id },
+  });
+};
 const deleteEvent = async (userId: string, event_id: string) => {
   // 1. Fetch the requester's role
   const user = await prisma.user.findUnique({
@@ -111,4 +118,5 @@ export const eventService = {
   publishEvent,
   editEvent,
   myEvents,
+  getOneEvent,
 };

@@ -10,7 +10,10 @@ router.post(
   eventController.createEvent,
 );
 
-router.get("/", eventController.getAllEvents);
+router.get("/", authorization(UserRole.OPTIONAL), eventController.getAllEvents);
+router.get("/my-events", authorization(), eventController.myEvents);
+
+router.get("/:id", eventController.getOneEvent);
 
 router.delete(
   "/:id",
@@ -27,12 +30,6 @@ router.patch(
   "/edit",
   authorization(UserRole.HOST, UserRole.MANAGER),
   eventController.editEvent,
-);
-
-router.get(
-  "/my-events",
-  authorization(),
-  eventController.myEvents,
 );
 
 export const eventRoutes = router;

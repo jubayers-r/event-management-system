@@ -2,6 +2,7 @@ import { IncomingMessage, Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import { auth } from "./lib/auth";
 import { prisma } from "./lib/prisma";
+import jwt, { JwtPayload } from "jsonwebtoken";
 
 type ClientMessage = {
   type: "SEND_MESSAGE";
@@ -27,12 +28,18 @@ export function initWebSocket(server: Server) {
   const wss = new WebSocketServer({ server });
 
   wss.on("connection", async (socket: WebSocket, req: IncomingMessage) => {
-    // 1. Authentication Check
-    const session = await auth.api.getSession({
-      headers: req.headers,
-    });
+    const token = req.headers["x-auth-token"] as string;
 
-    const userId = session?.user.id;
+    const decoded = jwt.verify(
+      token!,
+      process.env.JWT_SECRET as string,
+    ) as JwtPayload;
+
+
+    // 1. Authentication Check
+    const session = decoded;
+
+    const userId = session?.id;
 
     if (!userId) {
       console.error("WS Connection rejected: No session found");
@@ -58,7 +65,8 @@ export function initWebSocket(server: Server) {
         !payload.receiverId ||
         !payload.chatId ||
         !payload.message
-      ) return;
+      )
+        return;
 
       try {
         // 3. Persist to Database
@@ -71,9 +79,9 @@ export function initWebSocket(server: Server) {
           },
           include: {
             sender: {
-              select: { id: true, name: true, image: true }
-            }
-          }
+              select: { id: true, name: true, image: true },
+            },
+          },
         });
 
         // 4. Prepare Broadcast Data
@@ -91,10 +99,11 @@ export function initWebSocket(server: Server) {
         // 6. Optional: Send confirmation back to Sender
         // (Helps with "delivered" UI states)
         socket.send(outgoing);
-
       } catch (error) {
         console.error("Failed to save/send message:", error);
-        socket.send(JSON.stringify({ type: "ERROR", message: "Failed to send message" }));
+        socket.send(
+          JSON.stringify({ type: "ERROR", message: "Failed to send message" }),
+        );
       }
     });
 

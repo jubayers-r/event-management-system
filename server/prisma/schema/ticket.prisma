@@ -3,6 +3,7 @@ enum TicketStatus {
     PAID
     CANCELLED
     FAILED
+    REFUNDED
 }
 
 model Ticket {
