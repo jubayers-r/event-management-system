@@ -7,6 +7,7 @@ import webhookStripe from "./lib/webhookStripe";
 import { createChat } from "./modules/chat/chat.controller";
 import authorization from "./middleware/authorization";
 import { authRoutes } from "./modules/auth/auth.route";
+import cookieParser from "cookie-parser";
 
 const app: Application = express();
 
@@ -18,6 +19,7 @@ app.post(
   webhookStripe,
 );
 
+app.use(cookieParser());
 app.use(express.json());
 app.use(
   cors({
