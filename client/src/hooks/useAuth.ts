@@ -1,17 +1,18 @@
-"use client";
-
-import { useRouter } from "next/navigation";
-
-type SignupPayload = {
-  name?: string;
+type LoginPayload = {
   email: string;
   password: string;
 };
 
+type SignUpPayload = LoginPayload & {
+  name: string;
+};
+
+import { useRouter } from "next/navigation";
+
 export const useAuth = () => {
   const router = useRouter();
 
-  const signup = async (payload: SignupPayload) => {
+  const signUp = async (payload: SignUpPayload) => {
     const res = await fetch("http://localhost:5000/api/auth/signup", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -23,14 +24,10 @@ export const useAuth = () => {
       const err = await res.json();
       throw new Error(err.message || "Signup failed");
     }
-
-    router.push("/login");
+    router.push("/signin");
   };
 
-  const signin = async (payload: {
-    email: string;
-    password: string;
-  }) => {
+  const signIn = async (payload: LoginPayload) => {
     const res = await fetch("http://localhost:5000/api/auth/signin", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -40,11 +37,10 @@ export const useAuth = () => {
 
     if (!res.ok) {
       const err = await res.json();
-      throw new Error(err.message || "Signin failed");
+      throw new Error(err.message || "Login failed");
     }
-
-    router.push("/event");
+    router.push("/events");
   };
 
-  return { signup, signin };
+  return {signUp, signIn}
 };
