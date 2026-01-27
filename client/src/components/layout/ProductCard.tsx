@@ -1,3 +1,4 @@
+"use client";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -13,10 +14,13 @@ import {
 import { Button } from "@/components/ui/button";
 import { Price, PriceValue } from "@/components/layout/price";
 import { Product } from "./ProductList";
+import { usePathname } from "next/navigation";
 
-export function ProductCardList({ product }: { product: Product }) {
+export function ProductCard({ product }: { product: Product }) {
+  const pathname = usePathname();
+
   return (
-    <Card className="h-full overflow-hidden">
+    <Card className="h-full overflow-hidden py-0">
       <CardHeader className="relative p-0">
         <AspectRatio ratio={1.27}>
           <Image
@@ -52,9 +56,15 @@ export function ProductCardList({ product }: { product: Product }) {
           </Price>
         </div>
 
-        <Link href={`/events/${product.id}`}>
-          <Button className="w-full">Buy Now</Button>
-        </Link>
+        {pathname === "/events" ? (
+          <Link href={`/events/${product.id}`}>
+            <Button className="w-full">Buy Now</Button>
+          </Link>
+        ) : (
+          <Link href={`/events/${product.id}/update`}>
+            <Button className="w-full">Edit Event</Button>
+          </Link>
+        )}
       </CardContent>
     </Card>
   );

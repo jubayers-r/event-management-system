@@ -30,7 +30,7 @@ const authorization = (...roles: UserRole[]) => {
       // const token = req.cookies?.access_token;
       const token = req.headers["authorization"] as string | undefined;
 
-      // console.log({ token });
+      console.log({ token });
 
       if (!token && !roles.includes(UserRole.OPTIONAL)) {
         return res.status(403).json({
@@ -83,9 +83,9 @@ const authorization = (...roles: UserRole[]) => {
         role: user.role!,
       };
 
-      console.log({
-        user,
-      });
+      // console.log({
+      //   user,
+      // });
 
       if (
         roles.length &&

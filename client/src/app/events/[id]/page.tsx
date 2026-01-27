@@ -1,4 +1,4 @@
-import { ProductListProps } from "@/components/layout/ProductList";
+import { Product } from "@/components/layout/ProductList";
 import ProductDetail from "@/components/layout/ProductDetail";
 
 export default async function Event({
@@ -7,17 +7,16 @@ export default async function Event({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  console.log(id);
+
 
   const res = await fetch(`http://localhost:5000/api/event/${id}`);
 
-  console.log(res);
 
   if (!res.ok) {
     throw new Error("Failed to fetch event");
   }
 
-  const result: { data: ProductListProps } = await res.json();
+  const result: { data: Product } = await res.json();
 
   return (
     <div>

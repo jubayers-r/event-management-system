@@ -2,6 +2,8 @@
 
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { CirclePlus } from "lucide-react";
+import Link from "next/link";
 
 export default function LogoutButton() {
   const router = useRouter();
@@ -17,5 +19,12 @@ export default function LogoutButton() {
     router.refresh(); // re-render Server Components
   }
 
-  return <Button onClick={handleLogout}>Logout</Button>;
+  return (
+    <>
+      <Link href={"/events/create"}>
+        <CirclePlus />
+      </Link>
+      <Button onClick={handleLogout}>Logout</Button>
+    </>
+  );
 }

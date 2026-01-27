@@ -1,6 +1,5 @@
 "use client";
 
-
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -25,7 +24,6 @@ import { Input } from "@/components/ui/input";
 
 import { loginFormSchema } from "@/lib/zod/AuthForm";
 import { useAuth } from "@/hooks/useAuth";
-
 
 export default function Signin() {
   const { signIn } = useAuth();

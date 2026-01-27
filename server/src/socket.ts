@@ -26,9 +26,9 @@ export function initWebSocket(server: Server) {
   const wss = new WebSocketServer({ server });
 
   wss.on("connection", async (socket: WebSocket, req: IncomingMessage) => {
-    console.log(req.url);
+    // console.log(req.url);
     const token = req.url?.split("?token=")[1];
-    console.log({ token });
+    // console.log({ token });
 
     let decoded;
 
@@ -51,7 +51,7 @@ export function initWebSocket(server: Server) {
 
       // Store the active connection
       clients.set(userId, socket);
-      console.log({ session });
+      // console.log({ session });
 
       socket.on("message", async (data) => {
         let payload: ClientMessage;

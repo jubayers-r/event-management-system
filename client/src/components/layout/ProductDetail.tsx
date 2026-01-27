@@ -4,8 +4,7 @@ import { CircleCheck } from "lucide-react";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-
-import type { ProductListProps } from "./product-list";
+import { Product } from "./ProductList";
 
 function Price({
   value,
@@ -24,11 +23,7 @@ function Price({
   );
 }
 
-export default function ProductDetail({
-  product,
-}: {
-  product: ProductListProps;
-}) {
+export default function ProductDetail({ product }: { product: Product }) {
   return (
     <section className="py-24">
       <div className="container">
@@ -36,11 +31,14 @@ export default function ProductDetail({
           {/* Image */}
           <AspectRatio className="overflow-hidden rounded-xl border">
             <Image
-              src={product.image}
+              src={
+                "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/ecommerce/clothes/joshua-diaz-ETNoDLl8yFE-unsplash-1.jpg"
+              }
               alt={product.name}
               fill
               priority
               className="object-cover"
+              unoptimized
             />
           </AspectRatio>
 
@@ -59,7 +57,7 @@ export default function ProductDetail({
               <p className="text-muted-foreground">{product.description}</p>
             )}
 
-            <ul className="space-y-2 text-sm">
+            <ul className="space-y-2 text-lg">
               <li>
                 <span className="font-medium">Location:</span>{" "}
                 {product.location}

@@ -11,8 +11,9 @@ import AuthButtons from "./AuthButtons";
 
 const MENU = [
   { title: "Events", href: "/events" },
-  { title: "My Events", href: "/my-events" },
-  { title: "Manage Events", href: "/managed-events" },
+  { title: "My Events (Host)", href: "/my-events" },
+  { title: "Manage Events (Admin)", href: "/managed-events" },
+  { title: "My Tickets (User)", href: "/my-tickets" },
 ];
 
 export default function NavbarClient({ isLoggedIn }: { isLoggedIn: boolean }) {
