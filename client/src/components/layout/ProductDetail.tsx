@@ -1,53 +1,50 @@
-"use client";
-
-import { CircleCheck } from "lucide-react";
 import Image from "next/image";
+import { CircleCheck } from "lucide-react";
 
+import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { AspectRatio } from "@/components/ui/aspect-ratio";
 
-import { ProductListProps } from "./product-list1";
+import type { ProductListProps } from "./product-list";
 
-interface PriceProps {
+function Price({
+  value,
+  currency = "USD",
+}: {
   value: number;
   currency?: string;
+}) {
+  return (
+    <p className="text-3xl font-bold text-primary">
+      {new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency,
+      }).format(value)}
+    </p>
+  );
 }
 
-const Price = ({ value, currency = "USD" }: PriceProps) => {
-  const formatted = new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency,
-  }).format(value);
-
-  return <p className="text-3xl font-bold text-primary">{formatted}</p>;
-};
-
-interface ProductDetailProps {
+export default function ProductDetail({
+  product,
+}: {
   product: ProductListProps;
-}
-
-const ProductDetail = ({ product }: ProductDetailProps) => {
+}) {
   return (
     <section className="py-24">
       <div className="container">
-        <div className="grid grid-cols-1 gap-12 lg:grid-cols-2 justify-center lg:items-center">
-          {/* IMAGE */}
-          <AspectRatio ratio={1} className="overflow-hidden rounded-xl border">
+        <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
+          {/* Image */}
+          <AspectRatio className="overflow-hidden rounded-xl border">
             <Image
-              unoptimized
-              width={750}
-              height={750}
-              src={
-                "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/ecommerce/clothes/joshua-diaz-ETNoDLl8yFE-unsplash-1.jpg"
-              }
+              src={product.image}
               alt={product.name}
-              className="object-cover"
+              fill
               priority
+              className="object-cover"
             />
           </AspectRatio>
 
-          {/* INFO */}
+          {/* Details */}
           <div className="space-y-6">
             <h1 className="text-4xl font-bold">{product.name}</h1>
 
@@ -56,32 +53,32 @@ const ProductDetail = ({ product }: ProductDetailProps) => {
               {product.status}
             </Badge>
 
-            <Price value={product.joining_fee} currency="USD" />
+            <Price value={product.joining_fee} />
 
             {product.description && (
               <p className="text-muted-foreground">{product.description}</p>
             )}
 
-            <div className="space-y-2 text-sm">
-              <p>
+            <ul className="space-y-2 text-sm">
+              <li>
                 <span className="font-medium">Location:</span>{" "}
                 {product.location}
-              </p>
-              <p>
+              </li>
+              <li>
                 <span className="font-medium">Date:</span>{" "}
                 {new Date(product.date_time).toLocaleString()}
-              </p>
-              <p>
+              </li>
+              <li>
                 <span className="font-medium">Capacity:</span>{" "}
                 {product.people_capacity} people
-              </p>
+              </li>
               {product.category && (
-                <p>
+                <li>
                   <span className="font-medium">Category:</span>{" "}
                   {product.category}
-                </p>
+                </li>
               )}
-            </div>
+            </ul>
 
             <Button size="lg" className="w-full">
               Join Now
@@ -91,6 +88,4 @@ const ProductDetail = ({ product }: ProductDetailProps) => {
       </div>
     </section>
   );
-};
-
-export default ProductDetail;
+}

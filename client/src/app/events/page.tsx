@@ -1,4 +1,4 @@
-import { ProductList, ProductListProps } from "@/components/layout/product-list1";
+import { ProductList, ProductListProps } from "@/components/layout/ProductList";
 
 export default async function Events() {
   const res = await fetch("http://localhost:5000/api/event");

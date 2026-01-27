@@ -1,5 +1,5 @@
-import { ProductListProps } from "@/components/layout/product-list1";
-import ProductDetail from "@/components/layout/product-detail1";
+import { ProductListProps } from "@/components/layout/ProductList";
+import ProductDetail from "@/components/layout/ProductDetail";
 
 export default async function Event({
   params,

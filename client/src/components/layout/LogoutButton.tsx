@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { Button } from "./ui/button";
+import { Button } from "@/components/ui/button";
 
 export default function LogoutButton() {
   const router = useRouter();
@@ -10,15 +10,12 @@ export default function LogoutButton() {
     await fetch("http://localhost:5000/api/auth/signout", {
       method: "POST",
       credentials: "include",
-      cache: "no-store",
     });
 
-    router.replace("/login"); // prevent back navigation
+    // 🔥 THIS IS THE KEY
+    router.replace("/signin");
+    router.refresh(); // re-render Server Components
   }
 
-  return (
-    <form action={handleLogout}>
-      <Button type="submit">Logout</Button>
-    </form>
-  );
+  return <Button onClick={handleLogout}>Logout</Button>;
 }

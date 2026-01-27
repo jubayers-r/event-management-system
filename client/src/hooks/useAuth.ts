@@ -40,7 +40,8 @@ export const useAuth = () => {
       throw new Error(err.message || "Login failed");
     }
     router.push("/events");
+    router.refresh();
   };
 
-  return {signUp, signIn}
+  return { signUp, signIn };
 };
