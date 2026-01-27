@@ -24,7 +24,6 @@ model Ticket {
 
     //chat
     messages Message[]
-    chats    Chat[]
 
     @@map("ticket")
 }

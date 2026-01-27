@@ -204,6 +204,19 @@ const getMyTickets = async (user_id: string) => {
     where: {
       user_id,
     },
+    include: {
+      event: {
+        select: {
+          host: {
+            select: {
+              id: true,
+              email: true,
+              name: true,
+            },
+          },
+        },
+      },
+    },
   });
 };
 
